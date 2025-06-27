@@ -18,29 +18,49 @@ import {
   type AddReminderFormData,
 } from "@/lib/validations/add-reminder";
 import ErrorMessage from "./ui/error";
+import { useCalendarStore } from "@/lib/store/calendarStore";
 
 type ReminderModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  selectedDate?: Date;
 };
 
-export default function ReminderModal({ isOpen, onClose }: ReminderModalProps) {
+export default function ReminderModal({
+  isOpen,
+  onClose,
+  selectedDate,
+}: ReminderModalProps) {
+  const addReminder = useCalendarStore((state) => state.addReminder);
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
     watch,
+    reset,
   } = useForm<AddReminderFormData>({
     resolver: zodResolver(addReminderSchema),
   });
 
-  const selectedDate = watch("date");
+  const selectedDateForm = watch("date");
   const selectedTime = watch("time");
 
   const onSubmit = (data: AddReminderFormData) => {
-    console.log(data);
-    onClose();
+    const reminderDate = data.date || selectedDate;
+
+    if (reminderDate) {
+      addReminder({
+        title: data.title,
+        date: reminderDate,
+        time: data.time,
+        city: data.city,
+      });
+
+      reset();
+      onClose();
+    }
   };
 
   return (
@@ -71,7 +91,7 @@ export default function ReminderModal({ isOpen, onClose }: ReminderModalProps) {
 
           <div>
             <DatePicker
-              selected={selectedDate}
+              selected={selectedDateForm}
               onSelect={(date) => {
                 if (date) {
                   setValue("date", date);

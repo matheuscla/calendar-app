@@ -1,11 +1,20 @@
 import { create } from 'zustand';
 import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays } from 'date-fns';
+import { AddReminderFormData } from '@/lib/validations/add-reminder';
+
+export interface Reminder extends AddReminderFormData {
+  id: string;
+}
 
 type CalendarState = {
   currentMonth: Date;
   monthMatrix: Date[];
+  reminders: Reminder[];
   goToNextMonth: () => void;
   goToPrevMonth: () => void;
+  addReminder: (reminder: Omit<Reminder, 'id' | 'createdAt'>) => void;
+  updateReminder: (id: string, reminder: Partial<Omit<Reminder, 'id' | 'createdAt'>>) => void;
+  getRemindersForDate: (date: Date) => Reminder[];
 };
 
 export const useCalendarStore = create<CalendarState>((set, get) => {
@@ -27,13 +36,47 @@ export const useCalendarStore = create<CalendarState>((set, get) => {
   return {
     currentMonth: initialDate,
     monthMatrix: computeMonthMatrix(initialDate),
+    reminders: [],
+    
     goToNextMonth: () => {
       const newDate = new Date(get().currentMonth.getFullYear(), get().currentMonth.getMonth() + 1);
       set({ currentMonth: newDate, monthMatrix: computeMonthMatrix(newDate) });
     },
+    
     goToPrevMonth: () => {
       const newDate = new Date(get().currentMonth.getFullYear(), get().currentMonth.getMonth() - 1);
       set({ currentMonth: newDate, monthMatrix: computeMonthMatrix(newDate) });
+    },
+    
+    addReminder: (reminderData) => {
+      const newReminder: Reminder = {
+        ...reminderData,
+        id: crypto.randomUUID(),
+      };
+      
+      set((state) => ({
+        reminders: [...state.reminders, newReminder],
+      }));
+    },
+    
+    updateReminder: (id, updatedData) => {
+      set((state) => ({
+        reminders: state.reminders.map((reminder) =>
+          reminder.id === id ? { ...reminder, ...updatedData } : reminder
+        ),
+      }));
+    },
+    
+    getRemindersForDate: (date) => {
+      const { reminders } = get();
+      return reminders.filter((reminder) => {
+        const reminderDate = new Date(reminder.date);
+        return (
+          reminderDate.getFullYear() === date.getFullYear() &&
+          reminderDate.getMonth() === date.getMonth() &&
+          reminderDate.getDate() === date.getDate()
+        );
+      });
     },
   };
 });
