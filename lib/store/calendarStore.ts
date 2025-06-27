@@ -15,6 +15,8 @@ type CalendarState = {
   addReminder: (reminder: Omit<Reminder, 'id' | 'createdAt'>) => void;
   updateReminder: (id: string, reminder: Partial<Omit<Reminder, 'id' | 'createdAt'>>) => void;
   getRemindersForDate: (date: Date) => Reminder[];
+  selectedReminder: Reminder | null;
+  setSelectedReminder: (reminder: Reminder | null) => void;
 };
 
 export const useCalendarStore = create<CalendarState>((set, get) => {
@@ -37,6 +39,7 @@ export const useCalendarStore = create<CalendarState>((set, get) => {
     currentMonth: initialDate,
     monthMatrix: computeMonthMatrix(initialDate),
     reminders: [],
+    selectedReminder: null,
     
     goToNextMonth: () => {
       const newDate = new Date(get().currentMonth.getFullYear(), get().currentMonth.getMonth() + 1);
@@ -65,6 +68,10 @@ export const useCalendarStore = create<CalendarState>((set, get) => {
           reminder.id === id ? { ...reminder, ...updatedData } : reminder
         ),
       }));
+    },
+
+    setSelectedReminder: (reminder: Reminder | null) => {
+      set({ selectedReminder: reminder });
     },
     
     getRemindersForDate: (date) => {

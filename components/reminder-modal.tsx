@@ -23,15 +23,15 @@ import { useCalendarStore } from "@/lib/store/calendarStore";
 type ReminderModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  selectedDate?: Date;
 };
 
-export default function ReminderModal({
-  isOpen,
-  onClose,
-  selectedDate,
-}: ReminderModalProps) {
+export default function ReminderModal({ isOpen, onClose }: ReminderModalProps) {
   const addReminder = useCalendarStore((state) => state.addReminder);
+  const selectedReminder = useCalendarStore((state) => state.selectedReminder);
+  const updateReminder = useCalendarStore((state) => state.updateReminder);
+  const setSelectedReminder = useCalendarStore(
+    (state) => state.setSelectedReminder
+  );
 
   const {
     register,
@@ -42,34 +42,58 @@ export default function ReminderModal({
     reset,
   } = useForm<AddReminderFormData>({
     resolver: zodResolver(addReminderSchema),
+    values: {
+      title: selectedReminder?.title || "",
+      date: selectedReminder?.date || new Date(),
+      time: selectedReminder?.time || "",
+      city: selectedReminder?.city || "",
+    },
   });
 
   const selectedDateForm = watch("date");
   const selectedTime = watch("time");
 
+  const handleOnClose = () => {
+    onClose();
+    setSelectedReminder(null);
+  };
+
   const onSubmit = (data: AddReminderFormData) => {
-    const reminderDate = data.date || selectedDate;
+    const reminderDate = data.date;
 
     if (reminderDate) {
-      addReminder({
-        title: data.title,
-        date: reminderDate,
-        time: data.time,
-        city: data.city,
-      });
+      if (selectedReminder) {
+        updateReminder(selectedReminder.id, {
+          title: data.title,
+          date: reminderDate,
+          time: data.time,
+          city: data.city,
+        });
+      } else {
+        addReminder({
+          title: data.title,
+          date: reminderDate,
+          time: data.time,
+          city: data.city,
+        });
+      }
 
       reset();
-      onClose();
+      handleOnClose();
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleOnClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Reminder</DialogTitle>
+          <DialogTitle>
+            {selectedReminder ? "Edit Reminder" : "Add Reminder"}
+          </DialogTitle>
           <DialogDescription>
-            Add a reminder for a specific date
+            {selectedReminder
+              ? "Edit your reminder details"
+              : "Add a reminder for a specific date"}
           </DialogDescription>
         </DialogHeader>
 
@@ -127,7 +151,7 @@ export default function ReminderModal({
 
           <DialogFooter>
             <Button type="submit" className="w-full h-12 font-semibold">
-              Add Reminder
+              {selectedReminder ? "Update Reminder" : "Add Reminder"}
             </Button>
           </DialogFooter>
         </form>
