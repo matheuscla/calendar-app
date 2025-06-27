@@ -1,12 +1,7 @@
+"use client";
 import CalendarDay from "@/components/calendar-day";
 import CalendarHeader from "@/components/calendar-header";
-import {
-  startOfWeek,
-  startOfMonth,
-  endOfWeek,
-  endOfMonth,
-  addDays,
-} from "date-fns";
+import { useCalendarStore } from "@/lib/store/calendarStore";
 
 const days = [
   "Sunday",
@@ -18,22 +13,9 @@ const days = [
   "Saturday",
 ];
 
-const monthMatrix = (currentMonth: Date) => {
-  const start = startOfWeek(startOfMonth(currentMonth), { weekStartsOn: 0 });
-  const end = endOfWeek(endOfMonth(currentMonth), { weekStartsOn: 0 });
-
-  const days = [];
-  let day = start;
-
-  while (day <= end) {
-    days.push(day);
-    day = addDays(day, 1);
-  }
-
-  return days;
-};
-
 export default function Home() {
+  const { monthMatrix } = useCalendarStore();
+
   return (
     <div className="space-y-4 max-w-[1440px] mx-auto px-6">
       <CalendarHeader />
@@ -47,7 +29,7 @@ export default function Home() {
       </div>
 
       <div className="grid grid-cols-7 gap-1">
-        {monthMatrix(new Date()).map((day) => (
+        {monthMatrix.map((day) => (
           <CalendarDay key={day.toISOString()} day={day} />
         ))}
       </div>
