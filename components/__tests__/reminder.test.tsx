@@ -19,8 +19,10 @@ describe("Reminder", () => {
 
   it("renders the reminder time and title", () => {
     render(<Reminder reminder={baseReminder as any} />);
-    expect(screen.getByText("09:00")).toBeInTheDocument();
-    expect(screen.getByText("Doctor Appointment")).toBeInTheDocument();
+    expect(screen.getByTestId("reminder-time")).toHaveTextContent("09:00");
+    expect(screen.getByTestId("reminder-title")).toHaveTextContent(
+      "Doctor Appointment"
+    );
   });
 
   it("renders weather info if present", () => {
@@ -33,7 +35,9 @@ describe("Reminder", () => {
       },
     };
     render(<Reminder reminder={reminderWithWeather as any} />);
-    expect(screen.getByText("10°C - 20°C")).toBeInTheDocument();
-    expect(screen.getByText("Cloudy")).toBeInTheDocument();
+    expect(screen.getByTestId("reminder-weather")).toHaveTextContent(
+      "10°C - 20°C"
+    );
+    expect(screen.getByTestId("reminder-weather")).toHaveTextContent("Cloudy");
   });
 });

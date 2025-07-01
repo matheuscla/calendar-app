@@ -162,9 +162,9 @@ export default function ReminderModal({ isOpen, onClose }: ReminderModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOnClose}>
-      <DialogContent>
+      <DialogContent data-testid="reminder-modal">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle data-testid="reminder-modal-title">
             {selectedReminder ? "Edit Reminder" : "Add Reminder"}
           </DialogTitle>
           <DialogDescription>
@@ -180,6 +180,7 @@ export default function ReminderModal({ isOpen, onClose }: ReminderModalProps) {
               Reminder
             </Label>
             <Input
+              data-testid="reminder-title-input"
               id="title"
               {...register("title")}
               placeholder="Enter reminder title"
@@ -192,6 +193,7 @@ export default function ReminderModal({ isOpen, onClose }: ReminderModalProps) {
 
           <div>
             <DatePicker
+              data-testid="reminder-date-picker"
               selected={selectedDateForm}
               onSelect={(date) => {
                 if (date) {
@@ -216,6 +218,7 @@ export default function ReminderModal({ isOpen, onClose }: ReminderModalProps) {
               City
             </Label>
             <Input
+              data-testid="reminder-city-input"
               id="city"
               {...register("city")}
               placeholder="Enter city name"
@@ -228,6 +231,7 @@ export default function ReminderModal({ isOpen, onClose }: ReminderModalProps) {
 
           <DialogFooter>
             <Button
+              data-testid="reminder-submit-button"
               type="submit"
               className="w-full h-12 font-semibold"
               disabled={isLoading}

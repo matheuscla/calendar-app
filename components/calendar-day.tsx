@@ -11,6 +11,7 @@ export default function CalendarDay({ day }: { day: Date }) {
 
   return (
     <button
+      data-testid="calendar-day"
       className={cn(
         "flex flex-col h-32 sm:h-40 w-full items-start gap-1 p-1 sm:p-2 text-left rounded-md border hover:bg-accent focus:outline-none",
         isToday(day) && "border-primary",
@@ -18,6 +19,7 @@ export default function CalendarDay({ day }: { day: Date }) {
       )}
     >
       <span
+        data-testid="calendar-day-number"
         className={cn(
           "text-xs font-medium size-5 sm:size-6 flex items-center justify-center rounded-full flex-shrink-0",
           isToday(day) && "text-white font-semibold bg-blue-500 mb-1 sm:mb-2"
@@ -27,7 +29,10 @@ export default function CalendarDay({ day }: { day: Date }) {
       </span>
 
       <div className="flex-1 w-full min-h-0">
-        <div className="space-y-1 sm:space-y-2 overflow-y-auto max-h-full scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+        <div
+          data-testid="calendar-day-reminders"
+          className="space-y-1 sm:space-y-2 overflow-y-auto max-h-full scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
+        >
           {dayReminders.map((reminder) => (
             <Reminder key={reminder.id} reminder={reminder} />
           ))}

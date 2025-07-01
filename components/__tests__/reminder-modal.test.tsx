@@ -13,19 +13,17 @@ describe("ReminderModal", () => {
   it("renders add reminder modal when no selected reminder", () => {
     render(<ReminderModal isOpen={true} onClose={mockOnClose} />);
 
-    expect(
-      screen.getByRole("heading", { name: "Add Reminder" })
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("reminder-modal-title")).toHaveTextContent(
+      "Add Reminder"
+    );
     expect(
       screen.getByText("Add a reminder for a specific date")
     ).toBeInTheDocument();
-    expect(
-      screen.getByPlaceholderText("Enter reminder title")
-    ).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Enter city name")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Add Reminder" })
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("reminder-title-input")).toBeInTheDocument();
+    expect(screen.getByTestId("reminder-city-input")).toBeInTheDocument();
+    expect(screen.getByTestId("reminder-submit-button")).toHaveTextContent(
+      "Add Reminder"
+    );
   });
 
   it("renders edit reminder modal when selected reminder exists", () => {
@@ -41,32 +39,27 @@ describe("ReminderModal", () => {
 
     render(<ReminderModal isOpen={true} onClose={mockOnClose} />);
 
-    expect(
-      screen.getByRole("heading", { name: "Edit Reminder" })
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("reminder-modal-title")).toHaveTextContent(
+      "Edit Reminder"
+    );
     expect(screen.getByText("Edit your reminder details")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Doctor Appointment")).toBeInTheDocument();
     expect(screen.getByDisplayValue("New York")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Update Reminder" })
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("reminder-submit-button")).toHaveTextContent(
+      "Update Reminder"
+    );
   });
 
   it("does not render when isOpen is false", () => {
     render(<ReminderModal isOpen={false} onClose={mockOnClose} />);
 
-    expect(
-      screen.queryByRole("heading", { name: "Add Reminder" })
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("heading", { name: "Edit Reminder" })
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId("reminder-modal")).not.toBeInTheDocument();
   });
 
   it("shows validation errors for empty required fields", async () => {
     render(<ReminderModal isOpen={true} onClose={mockOnClose} />);
 
-    const submitButton = screen.getByRole("button", { name: "Add Reminder" });
+    const submitButton = screen.getByTestId("reminder-submit-button");
     fireEvent.click(submitButton);
 
     await waitFor(() => {
@@ -82,17 +75,17 @@ describe("ReminderModal", () => {
 
     render(<ReminderModal isOpen={true} onClose={mockOnClose} />);
 
-    fireEvent.change(screen.getByPlaceholderText("Enter reminder title"), {
+    fireEvent.change(screen.getByTestId("reminder-title-input"), {
       target: { value: "Test Reminder" },
     });
-    fireEvent.change(screen.getByPlaceholderText("Enter city name"), {
+    fireEvent.change(screen.getByTestId("reminder-city-input"), {
       target: { value: "New York" },
     });
 
     const timeInput = screen.getByLabelText("Time");
     fireEvent.change(timeInput, { target: { value: "10:00" } });
 
-    const submitButton = screen.getByRole("button", { name: "Add Reminder" });
+    const submitButton = screen.getByTestId("reminder-submit-button");
     fireEvent.click(submitButton);
 
     await waitFor(() => {
@@ -119,7 +112,7 @@ describe("ReminderModal", () => {
       <ReminderModal isOpen={true} onClose={mockOnClose} />
     );
 
-    fireEvent.change(screen.getByPlaceholderText("Enter reminder title"), {
+    fireEvent.change(screen.getByTestId("reminder-title-input"), {
       target: { value: "Test Reminder" },
     });
 
@@ -127,6 +120,48 @@ describe("ReminderModal", () => {
 
     rerender(<ReminderModal isOpen={true} onClose={mockOnClose} />);
 
-    expect(screen.getByPlaceholderText("Enter reminder title")).toHaveValue("");
+    expect(screen.getByTestId("reminder-title-input")).toHaveValue("");
+  });
+
+  it("validates form fields with specific validation rules", async () => {
+    render(<ReminderModal isOpen={true} onClose={mockOnClose} />);
+
+    fireEvent.change(screen.getByTestId("reminder-title-input"), {
+      target: { value: "Test Reminder" },
+    });
+
+    const submitButton = screen.getByTestId("reminder-submit-button");
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByText("Time is required")).toBeInTheDocument();
+      expect(screen.getByText("City is required")).toBeInTheDocument();
+      expect(screen.queryByText("Title is required")).not.toBeInTheDocument();
+    });
+
+    const timeInput = screen.getByLabelText("Time");
+    fireEvent.change(timeInput, { target: { value: "25:00" } });
+
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByText("Time is required")).toBeInTheDocument();
+    });
+
+    fireEvent.change(timeInput, { target: { value: "10:00" } });
+    fireEvent.change(screen.getByTestId("reminder-city-input"), {
+      target: { value: "New York" },
+    });
+
+    fireEvent.click(submitButton);
+
+    await waitFor(
+      () => {
+        expect(screen.queryByText("Time is required")).not.toBeInTheDocument();
+        expect(screen.queryByText("City is required")).not.toBeInTheDocument();
+        expect(screen.queryByText("Title is required")).not.toBeInTheDocument();
+      },
+      { timeout: 2000 }
+    );
   });
 });
