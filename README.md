@@ -2,6 +2,10 @@
 
 A modern calendar application that allows users to create, manage, and track reminders with integrated weather forecasts. Built with Next.js and TypeScript for a robust and type-safe development experience.
 
+## Project showcase
+
+https://www.loom.com/share/3a241966914847b2986b7e1473d6597a?sid=a047a81e-74ac-4b7c-b2a6-0b9fbdbca034
+
 ## Features
 
 - Monthly calendar view with intuitive navigation
@@ -40,3 +44,4 @@ A modern calendar application that allows users to create, manage, and track rem
 ### Tests
 
 Run `npm run test` to execute all test suites
+
