@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +19,8 @@ import {
 } from "@/lib/validations/add-reminder";
 import ErrorMessage from "./ui/error";
 import { useCalendarStore } from "@/lib/store/calendarStore";
+import { getCityWeather } from "@/lib/services/accuweather";
+import { Loader2 } from "lucide-react";
 
 type ReminderModalProps = {
   isOpen: boolean;
@@ -33,6 +35,8 @@ export default function ReminderModal({ isOpen, onClose }: ReminderModalProps) {
     (state) => state.setSelectedReminder
   );
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -42,44 +46,117 @@ export default function ReminderModal({ isOpen, onClose }: ReminderModalProps) {
     reset,
   } = useForm<AddReminderFormData>({
     resolver: zodResolver(addReminderSchema),
-    values: {
-      title: selectedReminder?.title || "",
-      date: selectedReminder?.date || new Date(),
-      time: selectedReminder?.time || "",
-      city: selectedReminder?.city || "",
+    defaultValues: {
+      title: "",
+      date: new Date(),
+      time: "",
+      city: "",
     },
   });
 
   const selectedDateForm = watch("date");
   const selectedTime = watch("time");
 
+  useEffect(() => {
+    if (isOpen) {
+      if (selectedReminder) {
+        reset({
+          title: selectedReminder.title,
+          date: selectedReminder.date,
+          time: selectedReminder.time,
+          city: selectedReminder.city,
+        });
+      } else {
+        reset({
+          title: "",
+          date: new Date(),
+          time: "",
+          city: "",
+        });
+      }
+    }
+  }, [isOpen, selectedReminder, reset]);
+
   const handleOnClose = () => {
     onClose();
     setSelectedReminder(null);
   };
 
-  const onSubmit = (data: AddReminderFormData) => {
+  const onSubmit = async (data: AddReminderFormData) => {
     const reminderDate = data.date;
 
     if (reminderDate) {
-      if (selectedReminder) {
-        updateReminder(selectedReminder.id, {
-          title: data.title,
-          date: reminderDate,
-          time: data.time,
-          city: data.city,
-        });
-      } else {
-        addReminder({
-          title: data.title,
-          date: reminderDate,
-          time: data.time,
-          city: data.city,
-        });
-      }
+      setIsLoading(true);
 
-      reset();
-      handleOnClose();
+      try {
+        const weatherData = await getCityWeather(data.city, reminderDate);
+
+        let reminderData: {
+          title: string;
+          date: Date;
+          time: string;
+          city: string;
+          weather?: {
+            temperature: {
+              min: number;
+              max: number;
+              unit: string;
+            };
+            description: string;
+            icon: number;
+          };
+        } = {
+          title: data.title,
+          date: reminderDate,
+          time: data.time,
+          city: data.city,
+        };
+
+        if (weatherData) {
+          const forecast = weatherData.weather.DailyForecasts[0];
+          reminderData = {
+            ...reminderData,
+            weather: {
+              temperature: {
+                min: forecast.Temperature.Minimum.Value,
+                max: forecast.Temperature.Maximum.Value,
+                unit: forecast.Temperature.Maximum.Unit,
+              },
+              description: forecast.Day.IconPhrase,
+              icon: forecast.Day.Icon,
+            },
+          };
+        }
+
+        if (selectedReminder) {
+          updateReminder(selectedReminder.id, reminderData);
+        } else {
+          addReminder(reminderData);
+        }
+
+        reset();
+        handleOnClose();
+      } catch (error) {
+        console.error("Error fetching weather data:", error);
+
+        const reminderData = {
+          title: data.title,
+          date: reminderDate,
+          time: data.time,
+          city: data.city,
+        };
+
+        if (selectedReminder) {
+          updateReminder(selectedReminder.id, reminderData);
+        } else {
+          addReminder(reminderData);
+        }
+
+        reset();
+        handleOnClose();
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -150,8 +227,21 @@ export default function ReminderModal({ isOpen, onClose }: ReminderModalProps) {
           </div>
 
           <DialogFooter>
-            <Button type="submit" className="w-full h-12 font-semibold">
-              {selectedReminder ? "Update Reminder" : "Add Reminder"}
+            <Button
+              type="submit"
+              className="w-full h-12 font-semibold"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {selectedReminder ? "Updating..." : "Adding..."}
+                </>
+              ) : selectedReminder ? (
+                "Update Reminder"
+              ) : (
+                "Add Reminder"
+              )}
             </Button>
           </DialogFooter>
         </form>

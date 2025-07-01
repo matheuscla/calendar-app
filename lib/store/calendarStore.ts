@@ -4,6 +4,15 @@ import { AddReminderFormData } from '@/lib/validations/add-reminder';
 
 export interface Reminder extends AddReminderFormData {
   id: string;
+  weather?: {
+    temperature: {
+      min: number;
+      max: number;
+      unit: string;
+    };
+    description: string;
+    icon: number;
+  };
 }
 
 type CalendarState = {

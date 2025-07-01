@@ -1,11 +1,12 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { type Reminder } from "@/lib/store/calendarStore"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function filterAndSortReminders(reminders: { id: string, date: Date; time: string, title: string, city: string }[], day: Date) {
+export function filterAndSortReminders(reminders: Reminder[], day: Date) {
   return reminders
     .filter((reminder) => {
       const reminderDate = new Date(reminder.date);
