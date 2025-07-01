@@ -22,30 +22,35 @@ export default function Home() {
   const { monthMatrix } = useCalendarStore();
 
   return (
-    <div className="space-y-4 max-w-[1440px] mx-auto px-6 py-10">
-      <div className="flex justify-end mb-10">
+    <div className="space-y-4 max-w-[1440px] mx-auto px-4 sm:px-6 py-6 sm:py-10">
+      <div className="flex justify-end mb-6 sm:mb-10">
         <Button
-          className="h-12 text-lg cursor-pointer"
+          className="h-10 sm:h-12 text-base sm:text-lg cursor-pointer"
           onClick={() => setIsReminderModalOpen(true)}
         >
-          <Bell />
-          New Reminder
+          <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
+          <span className="hidden sm:inline">New Reminder</span>
+          <span className="sm:hidden">Reminder</span>
         </Button>
       </div>
       <CalendarHeader />
 
-      <div className="grid grid-cols-7 text-center text-sm text-gray-500">
-        {days.map((day) => (
-          <div key={day} className="font-medium">
-            {day}
+      <div className="overflow-x-auto">
+        <div className="min-w-[600px] sm:min-w-full">
+          <div className="grid grid-cols-7 text-center text-xs sm:text-sm text-gray-500">
+            {days.map((day) => (
+              <div key={day} className="font-medium px-1">
+                {day}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      <div className="grid grid-cols-7 gap-1">
-        {monthMatrix.map((day) => (
-          <CalendarDay key={day.toISOString()} day={day} />
-        ))}
+          <div className="grid grid-cols-7 gap-1">
+            {monthMatrix.map((day) => (
+              <CalendarDay key={day.toISOString()} day={day} />
+            ))}
+          </div>
+        </div>
       </div>
 
       <ReminderModal

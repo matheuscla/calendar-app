@@ -19,9 +19,9 @@ export default function Reminder({ reminder }: { reminder: Reminder }) {
   return (
     <div
       onClick={handleEditReminder}
-      className="text-xs flex flex-col font-medium bg-neutral-900 rounded-md py-1 px-2 text-zinc-100 w-fit cursor-pointer hover:bg-neutral-800 transition-colors group"
+      className="text-xs flex flex-col font-medium bg-slate-500 rounded-md py-1 px-2 text-zinc-100 w-fit cursor-pointer hover:bg-neutral-800 transition-colors group"
     >
-      <div className="flex items-center gap-1">
+      <div className="flex items-baseline gap-1">
         <span>{reminder.time}</span>
         <span>{reminder.title}</span>
         <Pencil className="size-3 opacity-0 group-hover:opacity-100 transition-opacity" />
